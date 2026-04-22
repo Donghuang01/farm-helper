@@ -1216,7 +1216,7 @@ ui.layout(
             <vertical>
                 {/*页头*/}
                 <appbar id="appbar" bg="{{color}}" >
-                    <toolbar id="toolbar" title="卡通农场小助手" layout_height="50">
+                    <toolbar id="toolbar" title="Farm-helper" layout_height="50">
                         <img id="log_icon" src="@drawable/ic_assignment_black_48dp" w="22" h="22" tint="white" gravity="center" layout_gravity="right" marginRight="16" />
                         <img id="announcement_icon" src="@drawable/ic_notifications_black_48dp" w="22" h="22" tint="white" gravity="center" layout_gravity="right" marginRight="16" />
                     </toolbar>
@@ -1685,12 +1685,7 @@ ui.layout(
                                             <text text="chat_id" textSize="14" w="85" marginRight="12" />
                                             <input id="telegramChatIdInput" hint="Telegram聊天ID" w="*" textSize="14" h="auto" bg="#FFFFFF" padding="8" gravity="center_vertical" />
                                         </horizontal>
-                                        <horizontal id="telegramBotTokenRow" gravity="center_vertical" visibility="gone">
-                                            <text text="bot_token" textSize="14" w="65" marginRight="12" />
-                                            <img id="telegramBotTokenEyeIcon" w="20dp" h="20dp" src="@drawable/ic_visibility_off_black_48dp" />
-                                            <input id="telegramBotTokenInput" password="true" hint="bot token" w="*" textSize="14" h="auto" bg="#FFFFFF" padding="8" marginRight="8" gravity="center_vertical" visibility="visible" />
-                                            <input id="telegramBotTokenInputPlain" password="false" hint="bot token" w="*" textSize="14" h="auto" bg="#FFFFFF" padding="8" gravity="center_vertical" visibility="gone" />
-                                        </horizontal>
+                                        
                                         <horizontal id="telegramCommandRow" gravity="center_vertical" visibility="gone">
                                             <button id="telegramCmdStartBtn" textSize="14" w="auto" text="启动监听" style="Widget.AppCompat.Button.Borderless.Colored" />
                                             <button id="telegramCmdStopBtn" textSize="14" w="auto" text="停止监听" style="Widget.AppCompat.Button.Borderless.Colored" />
@@ -3002,7 +2997,7 @@ function downloadZip_dialogs() {
 function showAboutDialog() {
     dialogs.build({
         title: "关于",
-        content: "脚本名称：卡通农场小助手\n" +
+        content: "脚本名称：Farm-helper\n" +
             "版本：" + getAppVersion() + "\n" +
             "作者：ToughNobody\n\n" +
             "希望对你有帮助！",
@@ -3431,14 +3426,6 @@ function updateButtonColors() {
 ui.toolbar.setupWithDrawer(ui.drawer);
 
 ui.menu.setDataSource([{
-    title: "赏",
-    icon: "@drawable/ic_thumb_up_black_48dp"
-},
-{
-    title: "群",
-    icon: "@drawable/ic_group_black_48dp"
-},
-{
     title: "谢",
     icon: "@drawable/ic_favorite_black_48dp"
 },
@@ -5622,7 +5609,7 @@ function autoSc() {
 
 function pushTo(contentData) {
     threads.start(() => {
-        let title = "卡通农场小助手推送测试"; //推送标题
+        let title = "Farm-helper推送测试"; //推送标题
         let response = null;
         log(configs.get("serverPlatform").text, title, contentData)
         try {
@@ -7176,11 +7163,11 @@ function initUI() {
             configs.put("serverPlatform", { "text": item, "code": position });
             if (item === "Telegram") {
                 ui.telegramChatRow.attr("visibility", "visible");
-                ui.telegramBotTokenRow.attr("visibility", "visible");
+                
                 ui.telegramCommandRow.attr("visibility", "visible");
             } else {
                 ui.telegramChatRow.attr("visibility", "gone");
-                ui.telegramBotTokenRow.attr("visibility", "gone");
+                
                 ui.telegramCommandRow.attr("visibility", "gone");
             }
         },
