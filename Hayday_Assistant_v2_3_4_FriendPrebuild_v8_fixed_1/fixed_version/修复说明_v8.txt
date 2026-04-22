@@ -1,0 +1,29 @@
+v8 修复内容（基于 GPT v7 版本）
+
+【核心修复】
+1. buildFriendNetwork - 去掉多余的"接受好友请求"第2轮
+   Hay Day 机制：双方互发请求即自动成为好友，无需点接受
+
+2. ensureFriendRelationship - 同上，去掉 acceptFriendRequests 步骤
+   修复前：主号加供给号 → 切供给号接受 → 供给号加主号（错误）
+   修复后：主号加供给号 → 供给号加主号（互加即成功）
+
+3. findFriend / findCommunityFriend - 三级识别加强
+   第1级：图像匹配 0.9
+   第2级：图像匹配 0.75（降级重试）
+   第3级：OCR 文字识别（终极兜底）
+
+4. main.js - getDefaultConfig() 补充 storageUpgrade_makeFriendsFirst: false
+
+5. main.js - 修复 Telegram botToken 输入框永久隐藏的 bug
+
+6. enabled_options.js - 恢复 module 重试加载逻辑
+
+【独立更新源】
+- 更新地址已改为私有 GitHub 仓库
+- 所有请求需要 Authorization token
+
+【使用前必做】
+用文本编辑器打开 main.js，搜索：
+  YOUR_TOKEN_HERE
+替换为你的 GitHub Personal Access Token（共5处）
