@@ -3073,63 +3073,6 @@ function checkForUpdates(silence = false) {
                                 } else configs.put("ignoreVersion", null);
                             });
 
-
-                                // 检测Github连通性
-                                let githubThread = threads.start(function () {
-                                    let startTime = new Date().getTime();
-                                    let isTimeout = false;
-
-                                    // 设置10秒超时
-                                    let timeoutThread = threads.start(function () {
-                                        sleep(10000);
-                                        if (!isTimeout) {
-                                            isTimeout = true;
-                                            ui.run(() => {
-                                                dialog.getView().githubResult.setText("Github检测超时");
-                                                dialog.getView().githubResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                            });
-                                        }
-                                    });
-
-                                    try {
-                                        let response = http.get("https://raw.githubusercontent.com/Donghuang01/farm-helper/main/versionV2.json");
-                                        if (isTimeout) return; // 如果已经超时，直接返回
-
-                                        let endTime = new Date().getTime();
-                                        let duration = endTime - startTime;
-                                        isTimeout = true; // 标记已完成，防止超时线程继续执行
-                                        timeoutThread.interrupt(); // 中断超时线程
-
-                                        ui.run(() => {
-                                            if (response.statusCode == 200) {
-                                                let text = "Github连接成功，耗时: " + duration + "ms";
-                                                dialog.getView().githubResult.setText(text);
-                                                // 根据耗时设置颜色：超过1000ms为橙色，否则绿色
-                                                if (duration > 1000) {
-                                                    dialog.getView().githubResult.setTextColor(colors.parseColor("#FFA500")); // 橙色
-                                                } else {
-                                                    dialog.getView().githubResult.setTextColor(colors.parseColor("#008000")); // 绿色
-                                                }
-                                            } else {
-                                                dialog.getView().githubResult.setText("Github连接失败，状态码: " + response.statusCode + "，耗时: " + duration + "ms");
-                                                dialog.getView().githubResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                            }
-                                        });
-                                    } catch (e) {
-                                        if (isTimeout) return; // 如果已经超时，直接返回
-
-                                        let endTime = new Date().getTime();
-                                        let duration = endTime - startTime;
-                                        isTimeout = true; // 标记已完成，防止超时线程继续执行
-                                        timeoutThread.interrupt(); // 中断超时线程
-
-                                        ui.run(() => {
-                                            dialog.getView().githubResult.setText("Github连接出错: " + e.message + "，耗时: " + duration + "ms");
-                                            dialog.getView().githubResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                        });
-                                    }
-                                });
-                            });
                             // }).on("negative", () => {
                             //     // 调用热更新模块 - 立即更新（增量更新）
                             //     threads.start(() => {
