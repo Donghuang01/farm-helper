@@ -2914,31 +2914,10 @@ function downloadZip_dialogs() {
     // 弹出选择下载源的选项弹窗
     let updateSource = "github"; // 默认更新源
     dialogs.build({
-        title: "选择下载源",
-        customView: ui.inflate(
-            <vertical padding="16">
-                <text textSize="14sp" textColor="#333333">请选择下载源：</text>
-                <radio id="giteeRadio" text="Gitee (国内源)" checked="false" group="updateSourceGroup" marginTop="16" />
-                <radio id="githubRadio" text="GitHub (国外源)" group="updateSourceGroup" marginTop="8" />
-            </vertical>
-        ),
+        title: "下载更新",
+        content: "将从 GitHub 下载最新版本",
         positive: "开始下载",
         negative: "取消"
-    }).on("show", (dialog) => {
-        // 单选框选择事件
-        dialog.getView().githubRadio.on("check", (checked) => {
-            if (checked) {
-                updateSource = "github";
-                dialog.getView().giteeRadio.setChecked(false);
-            }
-        });
-
-        dialog.getView().giteeRadio.on("check", (checked) => {
-            if (checked) {
-                updateSource = "gitee";
-                dialog.getView().githubRadio.setChecked(false);
-            }
-        });
     }).on("positive", () => {
         // 执行全量更新
         threads.start(() => {
@@ -3071,12 +3050,7 @@ function checkForUpdates(silence = false) {
                                     <text id="versionInfo" textSize="14sp" textColor="#333333" marginTop="8" />
                                     <checkbox id="ignoreVersionCheck" textSize="14sp" textColor="#ef9a9a" marginTop="8" text="忽略此版本" checked={Boolean(configs.get("ignoreVersion"))} />
                                     <text id="updateContent" textSize="14sp" textColor="#333333" marginTop="16" />
-                                    <text id="giteeResult" textSize="12sp" textColor="#666666" marginTop="8" text="Gitee: 未检测" />
-                                    <text id="githubResult" textSize="12sp" textColor="#666666" marginTop="4" text="Github: 未检测" />
-                                    <button id="connectivityBtn" text="检测连通性" textSize="12sp" w="auto" h="auto" marginTop="16" />
-                                    <text textSize="14sp" textColor="#333333" marginTop="16">选择更新源：</text>
-                                    <radio id="giteeRadio" text="Gitee (国内源)" checked="false" group="updateSourceGroup" />
-                                    <radio id="githubRadio" text="GitHub (国外源)" group="updateSourceGroup" />
+                                    <text id="githubResult" textSize="12sp" textColor="#666666" marginTop="8" text="更新源: GitHub" />
                                 </vertical>
                             ),
                             positive: "下载压缩包",
@@ -3099,92 +3073,6 @@ function checkForUpdates(silence = false) {
                                 } else configs.put("ignoreVersion", null);
                             });
 
-                            // 单选框选择事件
-                            dialog.getView().githubRadio.on("check", (checked) => {
-                                if (checked) {
-                                    updateSource = "github";
-                                    dialog.getView().giteeRadio.setChecked(false);
-                                }
-                            });
-
-                            dialog.getView().giteeRadio.on("check", (checked) => {
-                                if (checked) {
-                                    updateSource = "gitee";
-                                    dialog.getView().githubRadio.setChecked(false);
-                                }
-                            });
-
-                            // 检测连通性按钮点击事件
-                            dialog.getView().connectivityBtn.on("click", () => {
-                                // 清除之前的线程，避免重复检测
-                                if (typeof giteeThread !== 'undefined' && giteeThread.isAlive()) {
-                                    giteeThread.interrupt();
-                                }
-                                if (typeof githubThread !== 'undefined' && githubThread.isAlive()) {
-                                    githubThread.interrupt();
-                                }
-
-                                // 点击后立即显示检测中状态
-                                dialog.getView().giteeResult.setText("Gitee: 检测中");
-                                dialog.getView().giteeResult.setTextColor(colors.parseColor("#666666"));
-                                dialog.getView().githubResult.setText("Github: 检测中");
-                                dialog.getView().githubResult.setTextColor(colors.parseColor("#666666"));
-
-                                // 检测Gitee连通性
-                                let giteeThread = threads.start(function () {
-                                    let startTime = new Date().getTime();
-                                    let isTimeout = false;
-
-                                    // 设置10秒超时
-                                    let timeoutThread = threads.start(function () {
-                                        sleep(10000);
-                                        if (!isTimeout) {
-                                            isTimeout = true;
-                                            ui.run(() => {
-                                                dialog.getView().giteeResult.setText("Gitee检测超时");
-                                                dialog.getView().giteeResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                            });
-                                        }
-                                    });
-
-                                    try {
-                                        let response = http.get("https://raw.githubusercontent.com/Donghuang01/farm-helper/main/versionV2.json");
-                                        if (isTimeout) return; // 如果已经超时，直接返回
-
-                                        let endTime = new Date().getTime();
-                                        let duration = endTime - startTime;
-                                        isTimeout = true; // 标记已完成，防止超时线程继续执行
-                                        timeoutThread.interrupt(); // 中断超时线程
-
-                                        ui.run(() => {
-                                            if (response.statusCode == 200) {
-                                                let text = "Gitee连接成功，耗时: " + duration + "ms";
-                                                dialog.getView().giteeResult.setText(text);
-                                                // 根据耗时设置颜色：超过1000ms为橙色，否则绿色
-                                                if (duration > 1000) {
-                                                    dialog.getView().giteeResult.setTextColor(colors.parseColor("#FFA500")); // 橙色
-                                                } else {
-                                                    dialog.getView().giteeResult.setTextColor(colors.parseColor("#008000")); // 绿色
-                                                }
-                                            } else {
-                                                dialog.getView().giteeResult.setText("Gitee连接失败，状态码: " + response.statusCode + "，耗时: " + duration + "ms");
-                                                dialog.getView().giteeResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                            }
-                                        });
-                                    } catch (e) {
-                                        if (isTimeout) return; // 如果已经超时，直接返回
-
-                                        let endTime = new Date().getTime();
-                                        let duration = endTime - startTime;
-                                        isTimeout = true; // 标记已完成，防止超时线程继续执行
-                                        timeoutThread.interrupt(); // 中断超时线程
-
-                                        ui.run(() => {
-                                            dialog.getView().giteeResult.setText("Gitee连接出错: " + e.message + "，耗时: " + duration + "ms");
-                                            dialog.getView().giteeResult.setTextColor(colors.parseColor("#FF0000")); // 红色
-                                        });
-                                    }
-                                });
 
                                 // 检测Github连通性
                                 let githubThread = threads.start(function () {
@@ -5200,8 +5088,6 @@ function loadConfigToUI(loadConfigFromFile = false) {
 
     // 设置telegram bot token
     const telegram_bot_token = config.telegramBotToken || "";
-    ui.telegramBotTokenInput.setText(telegram_bot_token);
-    ui.telegramBotTokenInputPlain.setText(telegram_bot_token);
 
     // 设置收割模式
     ui.harvestMode.setSelection(config.harvestMode);
@@ -6784,22 +6670,8 @@ function initUI() {
     }));
 
     // 为telegram bot token输入框添加变化监听
-    ui.telegramBotTokenInput.addTextChangedListener(new android.text.TextWatcher({
-        beforeTextChanged: function (s, start, count, after) { },
-        onTextChanged: function (s, start, before, count) {
-            configs.put("telegramBotToken", s.toString().trim());
-        },
-        afterTextChanged: function (s) { }
-    }));
 
     // 为telegram bot token普通输入框添加变化监听
-    ui.telegramBotTokenInputPlain.addTextChangedListener(new android.text.TextWatcher({
-        beforeTextChanged: function (s, start, count, after) { },
-        onTextChanged: function (s, start, before, count) {
-            configs.put("telegramBotToken", s.toString().trim());
-        },
-        afterTextChanged: function (s) { }
-    }));
 
     // 为itemName输入框添加变化监听
     ui.Tom_itemName.addTextChangedListener(new android.text.TextWatcher({
@@ -7064,25 +6936,6 @@ function initUI() {
         }
     });
 
-    // 为telegramBotTokenEyeIcon添加点击事件
-    ui.telegramBotTokenEyeIcon.click(() => {
-        // 检查当前输入框是否是密码模式
-        const isPassword = ui.telegramBotTokenInput.attr("visibility") === "visible";
-
-        if (isPassword) {
-            // 如果是密码模式，则切换为显示模式
-            ui.telegramBotTokenInputPlain.setText(configs.get("telegramBotToken", ""));
-            ui.telegramBotTokenInputPlain.attr("visibility", "visible"); // 显示普通输入框
-            ui.telegramBotTokenInput.attr("visibility", "gone"); // 隐藏密码输入框
-            ui.telegramBotTokenEyeIcon.attr("src", "@drawable/ic_visibility_black_48dp");
-        } else {
-            // 如果是显示模式，则切换为密码模式
-            ui.telegramBotTokenInput.setText(configs.get("telegramBotToken", ""));
-            ui.telegramBotTokenInputPlain.attr("visibility", "gone"); // 隐藏普通输入框
-            ui.telegramBotTokenInput.attr("visibility", "visible"); // 显示密码输入框
-            ui.telegramBotTokenEyeIcon.attr("src", "@drawable/ic_visibility_off_black_48dp");
-        }
-    });
 
 
 
