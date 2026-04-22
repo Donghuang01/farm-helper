@@ -2912,13 +2912,13 @@ function showAnnouncement(silence = false) {
 
 function downloadZip_dialogs() {
     // 弹出选择下载源的选项弹窗
-    let updateSource = "gitee"; // 默认更新源
+    let updateSource = "github"; // 默认更新源
     dialogs.build({
         title: "选择下载源",
         customView: ui.inflate(
             <vertical padding="16">
                 <text textSize="14sp" textColor="#333333">请选择下载源：</text>
-                <radio id="giteeRadio" text="Gitee (国内源)" checked="true" group="updateSourceGroup" marginTop="16" />
+                <radio id="giteeRadio" text="Gitee (国内源)" checked="false" group="updateSourceGroup" marginTop="16" />
                 <radio id="githubRadio" text="GitHub (国外源)" group="updateSourceGroup" marginTop="8" />
             </vertical>
         ),
@@ -2999,7 +2999,7 @@ function showAboutDialog() {
         title: "关于",
         content: "脚本名称：Farm-helper\n" +
             "版本：" + getAppVersion() + "\n" +
-            "作者：ToughNobody\n\n" +
+            "\n" +
             "希望对你有帮助！",
         positive: "确定",
         negative: "下载压缩包",
@@ -3063,7 +3063,7 @@ function checkForUpdates(silence = false) {
                 ui.run(() => {
                     if (compareResult < 0) {
                         // 有新版本
-                        let updateSource = "gitee"; // 默认更新源
+                        let updateSource = "github"; // 默认更新源
                         dialogs.build({
                             title: "发现新版本",
                             customView: ui.inflate(
@@ -3075,7 +3075,7 @@ function checkForUpdates(silence = false) {
                                     <text id="githubResult" textSize="12sp" textColor="#666666" marginTop="4" text="Github: 未检测" />
                                     <button id="connectivityBtn" text="检测连通性" textSize="12sp" w="auto" h="auto" marginTop="16" />
                                     <text textSize="14sp" textColor="#333333" marginTop="16">选择更新源：</text>
-                                    <radio id="giteeRadio" text="Gitee (国内源)" checked="true" group="updateSourceGroup" />
+                                    <radio id="giteeRadio" text="Gitee (国内源)" checked="false" group="updateSourceGroup" />
                                     <radio id="githubRadio" text="GitHub (国外源)" group="updateSourceGroup" />
                                 </vertical>
                             ),
@@ -3443,31 +3443,7 @@ ui.menu.on('item_bind', function (itemView, itemHolder) {
 
 ui.menu.on("item_click", item => {
     switch (item.title) {
-        case "赏":
-            showDonateDialog()
-            break;
-        case "群":
-            dialogs.build({
-                title: "👥 加入交流群 👥",
-                customView: ui.inflate(
-                    <vertical>
-                        <text text="想要加入我们的QQ交流群吗？" />
-                        <text text="这里有更多资源和帮助！" />
-                        <text id="qqGroupLink" text="群号:933276299" textColor="#0000FF" textStyle="bold" />
-                    </vertical>
-                ),
-                positive: "立即加入 🚀",
-                negative: "复制群号",
-                neutral: "再想想"
-            }).on("positive", () => {
-                app.openUrl("https://qm.qq.com/q/yfhVwFL3Zm");
-            }).on("negative", () => {
-                setClip("933276299");
-            }).on("neutral", () => {
-                // toast("没关系，随时欢迎加入！😊");
-            }).show();
 
-            break;
         case "谢":
             dialogs.build({
                 title: "致谢🙏",
@@ -3491,50 +3467,6 @@ ui.menu.on("item_click", item => {
     }
 })
 
-function showDonateDialog() {
-    dialogs.build({
-        title: "🌟投喂作者🌟 ",
-        content: "真的吗真的吗真的吗\n" +
-            "(ฅ´ω`ฅ)",
-        positive: "真的😍",
-        neutral: "逗你玩😝",
-    }).on("positive", () => {
-        toast("您的支持是我最大的动力！❤️")
-        // 创建悬浮窗显示二维码
-        let floatWindow = floaty.window(
-            <vertical padding="10">
-                <card w="*" h="*" cardCornerRadius="32" cardElevation="2" gravity="center">
-                    <vertical padding="8" bg="#afe2a7">
-                        <text text="感谢您的支持！" textSize="18" textStyle="bold" textColor="#333333" gravity="center" marginBottom="12" />
-                        <img src="file://{{currentPath}}/res/images/qrcode_wechat_reward.jpg" w="260" h="260" scaleType="fitXY" />
-                        <horizontal gravity="center" marginTop="12">
-                            <button id="closeBtn" text="关闭" style="Widget.AppCompat.Button.Colored" textColor="#000000" w="120" marginRight="10" />
-                            <button id="loveBtn" text="爱发电链接🔗" style="Widget.AppCompat.Button.Colored" textColor="#000000" w="120" marginRight="10" />
-                        </horizontal>
-                    </vertical>
-                </card>
-            </vertical>
-        );
-
-        // 设置悬浮窗位置，更靠左上方
-        floatWindow.setPosition(device.width / 10, device.height / 5);
-
-        // 爱发电按钮点击事件
-        floatWindow.loveBtn.on("click", () => {
-            app.openUrl("https://afdian.com/a/ToughNobody");
-            floatWindow.close();
-        });
-
-        // 关闭按钮点击事件
-        floatWindow.closeBtn.on("click", () => {
-            floatWindow.close();
-        });
-
-
-    }).on("neutral", () => {
-        toast("我哭死！😭");
-    }).show();
-}
 
 // 显示日志对话框函数
 function showLogDialog() {
@@ -7709,11 +7641,7 @@ function initUI() {
             });
     });
 
-    let nobody_Config = configs.get("Nobody");
-    let showDonationDialogProbability = (nobody_Config && nobody_Config.showDonationDialogProbability) || 0.3;
-    if (Math.random() < showDonationDialogProbability) {
-        showDonateDialog();
-    }
+
 }
 
 /**
