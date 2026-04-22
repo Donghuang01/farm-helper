@@ -1,8 +1,0 @@
-{
-  "version": "2.3.4",
-  "versionCode": 86,
-  "description": "修复好友识别、升仓互加好友逻辑",
-  "zip_name": "farm-helper.zip",
-  "zip_url_github": "https://github.com/Donghuang01/farm-helper/archive/refs/heads/main.zip",
-  "zip_url_gitee": ""
-}
