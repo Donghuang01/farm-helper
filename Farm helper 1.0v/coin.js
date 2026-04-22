@@ -1,0 +1,447 @@
+
+// 导入module模块
+let module;
+try {
+    module = require("./module.js");
+    if (!module) {
+        throw new Error("模块导入结果为空");
+    }
+    console.log("模块导入成功");
+} catch (error) {
+    console.error("模块导入失败:", error);
+    toast("模块导入失败，请检查module.js文件");
+        exit();
+    }
+
+//全局
+let config = module.config;
+let configs = storages.create("config");
+let cangkuItemColor = module.cangkuItemColor;
+let otherItemColor = module.otherItemColor;
+let allItemColor = module.allItemColor;
+const color_lib = require("./color_lib.js");
+//商店物品颜色
+const shopItemColor = color_lib.shopItemColor;
+const shopSellItemColor = color_lib.shopSellItemColor;
+
+//改此处============================
+
+const 照片文件夹 = config.coin_picDirPath
+log("照片文件夹:", 照片文件夹)
+
+let 主号 = config.coin_mainAccount;
+let 主号农场名 = config.coin_mainAccount_picName   //照片名称
+
+let 小号 = config.coin_subAccount;
+let 小号农场名 = config.coin_subAccount_picName     //照片名称
+
+let 导金币物品 = config.coin_item
+
+
+
+//==================================
+
+// 判断主号和小号农场名照片是否存在
+function isPhotoExists(photoName) {
+    const photoPath = `${照片文件夹}/${photoName}.png`;
+    return files.exists(photoPath);
+}
+
+// 检查主号农场名照片
+if (!isPhotoExists(主号农场名)) {
+    log(`警告: 主号农场名${主号农场名}的照片不存在`);
+    module.showTip(`警告: 主号农场名${主号农场名}的照片不存在`);
+    exit();
+} else {
+    log(`主号农场名${主号农场名}的照片存在`);
+}
+
+// 检查小号农场名照片
+if (!isPhotoExists(小号农场名)) {
+    log(`警告: 小号农场名${小号农场名}的照片不存在`);
+    module.showTip(`警告: 小号农场名${小号农场名}的照片不存在`);
+    exit();
+} else {
+    log(`小号农场名${小号农场名}的照片存在`);
+}
+
+sell = [{ item: 导金币物品, sellNum: -1, "done": true }]
+
+//1  365
+//2  450
+//3  550
+//4  640
+
+
+// let 大号点小号 = { x: 500, y: 640 };
+// let 小号点大号 = { x: 500, y: 450 };
+
+
+// let module = require("/storage/emulated/0/脚本/卡通农场小助手/module.js");
+
+// 启动自动点击权限请求
+module.autoSc();
+
+try {
+    module.createWindow(config.showText);
+} catch (error) {
+    console.error("创建窗口失败:", error);
+}
+
+// configs.put("findAccountMethod","ocr")
+
+let currAccount = null
+
+function main() {
+    module.checkmenu();
+    module.switch_account(主号);
+    currAccount = 主号
+    while (true) {
+
+        sleep(500)
+        module.huadong();
+        sleep(1200);
+        while (!openshop()) { 
+            module.huadong();
+        }
+        let sellPlan = sell
+        sellPlan = module.sellPlanValidate(sellPlan);
+        if (sellPlan) {
+            log("商店售卖计划:" + JSON.stringify(sellPlan))
+            module.shop_sell(sellPlan, shopSellItemColor, null, currAccount == 主号 ? 2 : 0)
+        }
+        sleep(100)
+        module.find_close();
+        //这里账号名
+        module.switch_account(小号);
+        currAccount = 小号
+
+
+        module.openFriendMenu();
+        sleep(500)
+        click(550, 150)
+        sleep(1000)
+
+
+        if (!findFriend(主号农场名, 小号农场名)) continue;
+
+        sleep(500)
+        while (!friendButton()) { module.close() }
+
+
+        module.huadong()
+        sleep(1500)
+        while (!openshop()) {
+            module.huadong();
+         }
+
+        sleep(1000)
+        gestures([0, 100, [250, 270]], [0, 100, [430, 270]], [0, 100, [620, 270]], [0, 100, [800, 270]], [0, 100, [990, 270]],
+            [0, 100, [250, 470]], [0, 100, [430, 470]], [0, 100, [620, 470]], [0, 100, [800, 470]], [0, 100, [990, 470]]
+        )
+        sleep(1000)
+        if (module.matchColor([{ x: 332, y: 64, color: "#dfb57a" },
+        { x: 1119, y: 67, color: "#ed424d" }, { x: 1120, y: 109, color: "#f3c341" },
+        { x: 629, y: 407, color: "#ffeb3e" }, { x: 1091, y: 252, color: "#fff9db" },
+        { x: 923, y: 599, color: "#f6b633" }])) {
+            toastLog("倒金币完成")
+            engines.myEngine().forceStop();
+        }
+        //商店右滑
+        const [x1, y1] = [960, 390];
+        const [x2, y2] = [288, 390];
+        swipe(x1 + module.ran(), y1 + module.ran(), x2 + module.ran(), y2 + module.ran(), 1000);
+        console.log("商店右滑")
+        sleep(500)
+        gestures([0, 100, [250, 270]], [0, 100, [430, 270]], [0, 100, [620, 270]], [0, 100, [800, 270]], [0, 100, [990, 270]],
+            [0, 100, [250, 470]], [0, 100, [430, 470]], [0, 100, [620, 470]], [0, 100, [800, 470]], [0, 100, [990, 470]]
+        )
+        sleep(500)
+        module.find_close();
+        sleep(500)
+        module.find_close();
+        sleep(1000)
+        module.checkmenu();
+        //回来售卖
+        sleep(500)
+        module.huadong();
+        sleep(1500);
+
+        while (!openshop()) { 
+            module.huadong();
+        }
+
+        sellPlan = sell
+        sellPlan = module.sellPlanValidate(sellPlan);
+        if (sellPlan) {
+            log("商店售卖计划:" + JSON.stringify(sellPlan))
+            module.shop_sell(sellPlan, shopSellItemColor, null, currAccount == 主号 ? 2 : 0)
+        }
+        sleep(100)
+        module.find_close();
+
+        //切回大号买1金物品
+
+        module.switch_account(主号);
+        currAccount = 主号
+
+        sleep(1000);
+        module.openFriendMenu();
+
+        sleep(500)
+        click(550, 150)
+        sleep(1000)
+
+        //双击账号
+        if (!findFriend(小号农场名, 主号农场名)) continue;
+
+        sleep(500)
+        while (!friendButton()) { }
+
+        sleep(500)
+        module.huadong()
+        sleep(1500)
+        while (!openshop()) { 
+            module.huadong();
+        }
+
+        sleep(1000)
+        gestures([0, 100, [250, 270]], [0, 100, [430, 270]], [0, 100, [620, 270]], [0, 100, [800, 270]], [0, 100, [990, 270]],
+            [0, 100, [250, 470]], [0, 100, [430, 470]], [0, 100, [620, 470]], [0, 100, [800, 470]], [0, 100, [990, 470]]
+        )
+        //商店右滑
+        sleep(1000)
+
+        swipe(x1 + module.ran(), y1 + module.ran(), x2 + module.ran(), y2 + module.ran(), 1000);
+        console.log("商店右滑")
+        sleep(500)
+        gestures([0, 100, [250, 270]], [0, 100, [430, 270]], [0, 100, [620, 270]], [0, 100, [800, 270]], [0, 100, [990, 270]],
+            [0, 100, [250, 470]], [0, 100, [430, 470]], [0, 100, [620, 470]], [0, 100, [800, 470]], [0, 100, [990, 470]]
+        )
+        sleep(500)
+        module.find_close();
+        sleep(500)
+        module.find_close();
+        sleep(1000)
+        module.checkmenu();
+
+    }
+}
+
+function friendButton() {
+    while (true) {//点开好友栏
+        let friendMenu = module.matchColor(allItemColor["好友簿"])
+
+
+
+        let sc = captureScreen();
+        //新版界面
+        let allMatch = module.findMC(allItemColor["新版界面"], sc, [1140, 570, 120, 130]);
+
+        //老版界面
+        let allMatch2 = module.findMC(allItemColor["老版界面"], sc, [1140, 570, 120, 130]);
+
+        if (allMatch || allMatch2) {
+            log("进入界面")
+            module.showTip("进入界面")
+            return true;
+        }
+
+        if (friendMenu) {
+            module.showTip("关闭好友栏");
+            log("关闭好友栏")
+            let friendButton = module.findMC(allItemColor["新版界面"]);
+            if (friendButton) {
+                log("点击好友按钮")
+                click(friendButton.x + module.ran(), friendButton.y + module.ran());
+                sleep(200);
+            }
+            else {
+                //老版界面
+                friendButton = module.findMC(allItemColor["老版界面"]);
+                if (friendButton) {
+                    log("点击好友按钮")
+                    click(friendButton.x + module.ran(), friendButton.y + module.ran());
+                    sleep(200);
+                }
+            }
+            return true;
+        }
+        sleep(1000)
+        module.close();
+    }
+
+}
+
+function openshop() {
+    let maxAttempts = 2; // 最大尝试次数
+    try {
+        for (let i = 0; i < maxAttempts; i++) {
+            let findshop_1 = findshop();
+            if (findshop_1 === true) return true;
+            if (findshop_1) {
+                console.log("打开路边小店");
+                module.showTip("打开路边小店");
+                sleep(300);
+                click(findshop_1.x + config.shopOffset.x + module.ran(), findshop_1.y + config.shopOffset.y + module.ran());
+                sleep(100)
+                if (module.inShop()) {
+
+                    return true; // 成功找到并点击
+                }
+            }
+
+            if (i < maxAttempts - 1) { // 如果不是最后一次尝试，就滑动重找
+                console.log("未找到商店，尝试滑动重新寻找");
+                module.showTip("未找到商店，尝试滑动重新寻找");
+                module.close();
+                sleep(1000);
+                module.huadong();
+                sleep(1200);
+            }
+        }
+    } catch (error) {
+        log(error);
+    }
+    console.log("多次尝试后仍未找到商店");
+    module.showTip("多次尝试后仍未找到商店");
+    return false; // 表示未能成功打开商店
+};
+
+function findshop(silence = false) {
+    console.log("找" + config.landFindMethod);
+    let center;
+    for (let i = 0; i < 5; i++) {
+        try {
+            if (module.inShop()) {
+                return true;
+            }
+            if (!silence) module.showTip("第 " + (i + 1) + " 次检测" + config.landFindMethod);
+            if (config.landFindMethod == "商店") {
+                center = module.findimage(files.join(config.photoPath, "shop.png"), 0.6);
+                if (!center) {
+                    center = module.findimage(files.join(config.photoPath, "shop1.png"), 0.6);
+                };
+            } else {
+                center = module.findimage(files.join(config.photoPath, "bakery.png"), 0.6);
+                if (!center) {
+                    center = module.findimage(files.join(config.photoPath, "bakery1.png"), 0.6);
+                };
+            };
+        } catch (error) {
+            log(error);
+        }
+        if (center) break
+        else {
+            // find_close();
+            sleep(500);
+        }
+    }
+    if (center) {
+        console.log("找到" + config.landFindMethod + "，坐标: " + center.x + "," + center.y,);
+        // 找到面包房
+        return center;
+    } else {
+        console.log("未找到" + config.landFindMethod);
+        // 未找到面包房
+        return false;
+    }
+}
+
+let randomOffset = 5; // 随机偏移量
+function ran() {
+    return Math.random() * (2 * randomOffset) - randomOffset;
+}
+
+function findFriend(Account, Account_1, isclick = true) {
+    const MAX_SCROLL_DOWN = 5; // 最多下滑5次
+
+    let found = false; // 是否找到目标
+    let scrollDownCount = 0; // 当前下滑次数
+    let isEnd = false;
+    let AccountIma = null;
+    let AccountIma_1 = null;
+
+    AccountIma = files.join(照片文件夹, Account + ".png");
+    AccountIma_1 = files.join(照片文件夹, Account_1 + ".png");
+    log("账号图片路径：" + AccountIma);
+    log("账号图片路径：" + AccountIma_1);
+    module.showTip("");
+    while (!found) {
+        sleep(500);
+
+        let addFriendMenu = module.matchColor([{ x: 146, y: 84, color: "#f4da4e" },
+        { x: 132, y: 106, color: "#fefdfc" }, { x: 346, y: 45, color: "#dfb479" },
+        { x: 1109, y: 76, color: "#f34853" }])
+        if (!addFriendMenu) {
+            module.openFriendMenu();
+            sleep(500)
+            click(550, 150)
+            sleep(1000)
+        }
+
+        let is_find_Account = null;
+
+        is_find_Account = module.findimage(AccountIma, 0.9);
+
+
+        if (is_find_Account && isclick) { //如果找到账号名称，则点击
+            log(`找到账号${Account}`);
+            // module.showTip(`找到账号${Account}`);
+            sleep(500);
+            click(is_find_Account.x + module.ran(), is_find_Account.y + module.ran());
+            sleep(300);
+            click(is_find_Account.x + module.ran(), is_find_Account.y + module.ran());
+            sleep(300)
+            click(is_find_Account.x + module.ran(), is_find_Account.y + module.ran());
+            sleep(500);
+            found = true;
+            break;
+        }
+
+        let is_find_Account_1 = null;
+        is_find_Account_1 = module.findimage(AccountIma_1, 0.9);
+        if (is_find_Account_1 && click) { //如果找到另一个账号名称，则换号
+            log(`找到账号${Account_1}`);
+            module.showTip(`找到账号${Account_1},切换账号`);
+            module.switch_account(Account_1 == 主号农场名 ? 主号 : 小号);
+            currAccount = Account_1 == 主号农场名 ? 主号 : 小号
+            sleep(500);
+            return false;
+        }
+
+        //检测是否在好友簿界面
+        if (!module.matchColor([{ x: 544, y: 130, color: "#fff9db" }, { x: 425, y: 55, color: "#deb476" }])) {
+            module.openFriendMenu();
+            sleep(500)
+            click(550, 150)
+            sleep(1000)
+        }
+
+        if (scrollDownCount < MAX_SCROLL_DOWN) {
+            swipe(600, 630, 600, 350, 1000); // 下滑
+            scrollDownCount++;
+            log(`未找到账号，第 ${scrollDownCount} 次下滑...`);
+            // module.showTip(`未找到账号，第 ${scrollDownCount} 次下滑...`);
+            sleep(1500);
+
+            continue;
+        }
+
+        else if (scrollDownCount >= MAX_SCROLL_DOWN) {
+            log(`未找到账号，上滑回顶部...`);
+            // module.showTip("未找到账号，上滑回顶部");
+            swipe(600, 350, 600, 630, 300);
+            sleep(500)
+            swipe(600, 350, 600, 630, 300);
+            sleep(500)
+            scrollDownCount = 0;
+        }
+    }
+    return true;
+}
+
+
+
+main();
+
