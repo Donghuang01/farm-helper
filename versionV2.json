@@ -1,0 +1,8 @@
+{
+  "version": "2.3.5",
+  "versionCode": 87,
+  "description": "farm-helper 2.3.5 更新\n- 更新源改为 GitHub\n- 更换为 Donghuang01 仓库",
+  "zip_name": "farm-helper.zip",
+  "zip_url_github": "https://github.com/Donghuang01/farm-helper/archive/refs/heads/main.zip",
+  "zip_url_gitee": ""
+}
